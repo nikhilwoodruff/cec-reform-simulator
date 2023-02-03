@@ -36,6 +36,12 @@ div {
 [data-baseweb="slider"] {
     padding-left: 10px !important;
 }
+#MainMenu {
+    visibility: hidden;
+}
+footer {
+    visibility: hidden;
+}
 </style>
 """
 st.write(hide_footer_style, unsafe_allow_html=True)
