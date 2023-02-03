@@ -9,6 +9,19 @@ API = "https://api.policyengine.org/uk"
 def get_metadata():
     return requests.get(API + "/metadata").json()["result"]
 
+hide_footer_style = """
+<style>
+.reportview-container .main footer {visibility: hidden;}    
+"""
+st.markdown(hide_footer_style, unsafe_allow_html=True)
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
 metadata = get_metadata()
 variables = metadata["variables"]
 
