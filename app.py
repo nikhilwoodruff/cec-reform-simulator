@@ -19,7 +19,7 @@ footer {
 }
 section > div.block-container {
     padding-top: 0px !important;
-    padding-bottom: 0px !important;
+    padding-bottom: 1000px !important;
 }
 h1,
 h2,
@@ -216,9 +216,9 @@ def get_colour(x, y):
         return "inverse"
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Net income", f"£{baseline_net_income:,.0f}", int(reform_net_income - baseline_net_income))
-col2.metric("Benefits", f"£{baseline_benefits:,.0f}", int(reform_benefits - baseline_benefits))
-col3.metric("Tax", f"£{baseline_tax:,.0f}", int(reform_tax - baseline_tax))
+col1.metric("Net income", f"£{reform_net_income:,.0f}", int(reform_net_income - baseline_net_income))
+col2.metric("Benefits", f"£{reform_benefits:,.0f}", int(reform_benefits - baseline_benefits))
+col3.metric("Tax", f"£{reform_tax:,.0f}", int(reform_tax - baseline_tax))
 
 @st.cache(show_spinner=False)
 def get_economic_impact(reform):
