@@ -11,16 +11,34 @@ def get_metadata():
 
 hide_footer_style = """
 <style>
-.reportview-container .main footer {visibility: hidden;}    
+header {
+    display: none !important;
+}
+footer {
+    display: none !important;
+}
+section > div.block-container {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div {
+  font-family: "Roboto", sans-serif !important;
+  font-weight: 500;
+}
+[data-baseweb="slider"] {
+    padding-left: 10px !important;
+}
+</style>
 """
-st.markdown(hide_footer_style, unsafe_allow_html=True)
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+st.write(hide_footer_style, unsafe_allow_html=True)
 
 metadata = get_metadata()
 variables = metadata["variables"]
