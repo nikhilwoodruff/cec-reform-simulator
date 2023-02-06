@@ -2,6 +2,36 @@ import streamlit as st
 import requests
 import time
 import plotly.express as px
+from pathlib import Path
+import shutil
+from bs4 import BeautifulSoup
+
+def inject_js():
+    GA_JS = """
+<script type="text/javascript" id="js_injected">
+    setInterval(function() {
+        var links = document.getElementsByTagName("a");
+        for (var i = 0; i < links.length; i++) {
+            if (links[i].href == "https://streamlit.io/cloud") {
+                links[i].parentNode.removeChild(links[i]);
+            }
+        }
+    }, 5000);
+</script>
+"""
+    index_path = Path(st.__file__).parent / "static" / "index.html"
+    soup = BeautifulSoup(index_path.read_text(), features="lxml")
+    if not soup.find(id="js_injected"):
+        bck_index = index_path.with_suffix('.bck')
+        if bck_index.exists():
+            shutil.copy(bck_index, index_path)
+        else:
+            shutil.copy(index_path, bck_index)
+        html = str(soup)
+        new_html = html.replace('<head>', '<head>\n' + GA_JS)
+        index_path.write_text(new_html)
+
+inject_js()
 
 API = "https://api.policyengine.org/uk"
 
@@ -19,7 +49,7 @@ footer {
 }
 section > div.block-container {
     padding-top: 0px !important;
-    padding-bottom: 1000px !important;
+    padding-bottom: 0px !important;
 }
 h1,
 h2,
@@ -241,10 +271,11 @@ with st.expander("See the economic impact"):
     else:
         sentence = "Your reforms would have no impact on the budget"
     poverty_impact = impact["poverty"]["poverty"]["all"]["reform"] / impact["poverty"]["poverty"]["all"]["baseline"] - 1
+    absolute_poverty_impact = abs(impact["poverty"]["poverty"]["all"]["reform"] - impact["poverty"]["poverty"]["all"]["baseline"]) * 100
     if poverty_impact > 0:
-        sentence += f", raise poverty by {poverty_impact:.1%}"
+        sentence += f", raise poverty by {poverty_impact:.1%} ({absolute_poverty_impact:.1f} percentage points)"
     elif poverty_impact < 0:
-        sentence += f", reduce poverty by {abs(poverty_impact):.1%}"
+        sentence += f", reduce poverty by {abs(poverty_impact):.1%} ({absolute_poverty_impact:.1f} percentage points)"
     else:
         sentence += ", have no impact on poverty"
     
@@ -290,6 +321,7 @@ with st.expander("See the economic impact"):
         plot_bgcolor="white",
         paper_bgcolor="white",
         hovermode=False,
+        margin=dict(r=100),
     )
     st.write(decile_chart)
 
@@ -325,6 +357,7 @@ with st.expander("See the economic impact"):
         plot_bgcolor="white",
         paper_bgcolor="white",
         hovermode=False,
+        margin=dict(r=100),
     )
     st.write(poverty_chart)
     
