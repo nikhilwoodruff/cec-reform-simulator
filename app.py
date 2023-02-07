@@ -6,7 +6,7 @@ import datetime
 import humanize
 import dateutil
 
-API = "https://api.policyengine.org/uk"
+API = "http://127.0.0.1:5000/uk"
 
 
 @st.cache(show_spinner=False)
@@ -225,6 +225,14 @@ with st.expander("Enter your household details"):
             * 0.5
         )
 
+        total_wealth = st.slider(
+            f"How much wealth do you have?",
+            min_value=0,
+            max_value=10_000_000,
+            step=1000,
+            key="total_wealth",
+        )
+
         situation = {
             "people": people,
             "benunits": {
@@ -237,6 +245,7 @@ with st.expander("Enter your household details"):
                     "members": list(people.keys()),
                     "BRMA": {2023: brma},
                     "full_rate_vat_consumption": {2023: full_rate_consumption},
+                    "total_wealth": {2023: total_wealth},
                     "household_net_income": {2023: None},
                     "household_benefits": {2023: None},
                     "household_tax": {2023: None},
@@ -253,67 +262,85 @@ def invert_dict(d):
 with st.expander("Select a tax-benefit reform"):
     with st.form("tax_benefit_reform"):
         st.write("Should the government...")
-        basic_rate = st.select_slider(
-            "change the basic rate of income tax?",
-            options=["lower to 18%", "keep the same", "raise to 22%"],
-            value="keep the same",
-        )
         basic_rate_map = {
             "lower to 18%": 0.18,
+            "lower to 19%": 0.19,
             "keep the same": 0.2,
+            "raise to 21%": 0.21,
             "raise to 22%": 0.22,
         }
-        basic_rate = basic_rate_map[basic_rate]
-        progressivity = st.select_slider(
-            "change the higher and additional rates?",
-            options=[
-                "cut both by 5p",
-                "keep the same",
-                "raise the higher/additional rates by 5p",
-            ],
+        basic_rate = st.select_slider(
+            "change the basic rate of income tax?",
+            options=basic_rate_map.keys(),
             value="keep the same",
         )
+        basic_rate = basic_rate_map[basic_rate]
         higher_rate_map = {
             "cut both by 5p": 0.35,
+            "cut the higher rate by 5p": 0.35,
             "keep the same": 0.4,
+            "raise the additional rate by 5p": 0.44,
             "raise the higher/additional rates by 5p": 0.45,
         }
+        progressivity = st.select_slider(
+            "change the higher and additional rates?",
+            options=higher_rate_map.keys(),
+            value="keep the same",
+        )
         higher_rate = higher_rate_map[progressivity]
         additional_rate_map = {
             "cut both by 5p": 0.4,
+            "cut the higher rate by 5p": 0.45,
             "keep the same": 0.45,
+            "raise the additional rate by 5p": 0.5,
             "raise the higher/additional rates by 5p": 0.5,
         }
         additional_rate = additional_rate_map[progressivity]
-        vat = st.select_slider(
-            "change the VAT rate?",
-            options=["lower to 15%", "keep the same", "raise to 25%"],
-            value="keep the same",
-        )
         vat_map = {
             "lower to 15%": 0.15,
+            "lower to 17.5%": 0.175,
             "keep the same": 0.2,
+            "raise to 22.5%": 0.225,
             "raise to 25%": 0.25,
         }
-        vat = vat_map[vat]
-        wealth_tax = st.select_slider(
-            "introduce a wealth tax?", options=["no", "1%", "5%"], value="no"
+        vat = st.select_slider(
+            "change the VAT rate?",
+            options=vat_map.keys(),
+            value="keep the same",
         )
-        wealth_tax_map = {"no": 0, "1%": 0.01, "5%": 0.05}
-        wealth_tax = wealth_tax_map[wealth_tax]
-        benefits = st.select_slider(
-            "change benefits?",
-            options=["decrease by 5%", "no", "increase by 5%"],
+        vat = vat_map[vat]
+        wealth_tax_map = {
+            "no": (0, 0),
+            "1% over £1m": (0.01, 1_000_000),
+            "2% over £1m": (0.02, 1_000_000),
+            "1% flat": (0.01, 0),
+            "2% flat": (0.02, 0),
+        }
+        wealth_tax = st.select_slider(
+            "introduce a wealth tax?",
+            options=wealth_tax_map.keys(),
             value="no",
         )
-        benefits_map = {"no": 0, "decrease by 5%": -0.05, "increase by 5%": 0.05}
+        wealth_tax = wealth_tax_map[wealth_tax]
+        benefits_map = {
+            "decrease by 10%": -0.1,
+            "decrease by 5%": -0.05,
+            "no": 0,
+            "increase by 5%": 0.05,
+            "increase by 10%": 0.1,
+        }
+        benefits = st.select_slider(
+            "change benefits?",
+            options=["no", "decrease by 5%", "increase by 5%"],
+            value="no",
+        )
         benefits = benefits_map[benefits]
+        ubi_map = {"no": 0, "£10 per week": 10, "£30 per week": 30}
         ubi = st.select_slider(
             "introduce a universal basic income?",
             options=["no", "£10 per week", "£30 per week"],
             value="no",
         )
-        ubi_map = {"no": 0, "£10 per week": 10, "£30 per week": 30}
         ubi = ubi_map[ubi]
 
         reform = {
@@ -327,7 +354,10 @@ with st.expander("Select a tax-benefit reform"):
                 "2023-01-01.2024-01-01": additional_rate
             },
             "gov.contrib.ubi_center.wealth_tax[0].rate": {
-                "2023-01-01.2024-01-01": wealth_tax
+                "2023-01-01.2024-01-01": wealth_tax[0]
+            },
+            "gov.contrib.ubi_center.wealth_tax[0].threshold": {
+                "2023-01-01.2024-01-01": wealth_tax[1]
             },
             "gov.contrib.ubi_center.basic_income.amount.flat": {
                 "2023-01-01.2024-01-01": ubi
@@ -359,9 +389,9 @@ with st.expander("Select a tax-benefit reform"):
             "Should the government introduce a wealth tax?": invert_dict(
                 wealth_tax_map
             )[wealth_tax],
-            "Should the government change benefits?": invert_dict(benefits_map)[
-                benefits
-            ],
+            "Should the government change benefits?": invert_dict(
+                benefits_map
+            )[benefits],
             "Should the government introduce a universal basic income?": invert_dict(
                 ubi_map
             )[
@@ -474,126 +504,137 @@ def get_economic_impact(reform):
 
 
 with st.expander("See the economic impact"):
-    impact = get_economic_impact(reform)
-    budgetary_impact = impact["budget"]["budgetary_impact"]
-    is_surplus = budgetary_impact < 0
-    if budgetary_impact > 0:
-        sentence = f"Your reforms would save £{abs(budgetary_impact/1e9):,.1f} billion per year"
-    elif budgetary_impact < 0:
-        sentence = f"Your reforms would cost £{abs(budgetary_impact/1e9):,.1f} billion per year"
+    try:
+        raise Exception()
+        impact = get_economic_impact(reform)
+    except:
+        st.error(
+            "We're having trouble computing the economic impact of your reforms. Please try again later."
+        )
     else:
-        sentence = "Your reforms would have no impact on the budget"
-    poverty_impact = (
-        impact["poverty"]["poverty"]["all"]["reform"]
-        / impact["poverty"]["poverty"]["all"]["baseline"]
-        - 1
-    )
-    absolute_poverty_impact = (
-        abs(
+        budgetary_impact = impact["budget"]["budgetary_impact"]
+        is_surplus = budgetary_impact < 0
+        if budgetary_impact > 0:
+            sentence = f"Your reforms would save £{abs(budgetary_impact/1e9):,.1f} billion per year"
+        elif budgetary_impact < 0:
+            sentence = f"Your reforms would cost £{abs(budgetary_impact/1e9):,.1f} billion per year"
+        else:
+            sentence = "Your reforms would have no impact on the budget"
+        poverty_impact = (
             impact["poverty"]["poverty"]["all"]["reform"]
-            - impact["poverty"]["poverty"]["all"]["baseline"]
+            / impact["poverty"]["poverty"]["all"]["baseline"]
+            - 1
         )
-        * 100
-    )
-    if poverty_impact > 0:
-        sentence += f", raise poverty by {poverty_impact:.1%} ({absolute_poverty_impact:.1f} percentage points)"
-    elif poverty_impact < 0:
-        sentence += f", reduce poverty by {abs(poverty_impact):.1%} ({absolute_poverty_impact:.1f} percentage points)"
-    else:
-        sentence += ", have no impact on poverty"
-
-    inequality_impact = (
-        impact["inequality"]["gini"]["reform"]
-        / impact["inequality"]["gini"]["baseline"]
-        - 1
-    )
-
-    if inequality_impact > 0:
-        sentence += f", and raise inequality by {inequality_impact:.1%}."
-    elif inequality_impact < 0:
-        sentence += f", and reduce inequality by {abs(inequality_impact):.1%}."
-    else:
-        sentence += ", and have no impact on inequality."
-
-    st.write(sentence)
-
-    decile_impact = impact["decile"]["relative"]
-    decile_impact = {int(k): v for k, v in decile_impact.items()}
-
-    def get_bar_colour(value):
-        if value > 0:
-            return DARK_GREEN
-        elif value <= 0:
-            return DARK_GRAY
-
-    decile_chart = (
-        px.bar(
-            x=list(decile_impact.keys()),
-            y=list(decile_impact.values()),
+        absolute_poverty_impact = (
+            abs(
+                impact["poverty"]["poverty"]["all"]["reform"]
+                - impact["poverty"]["poverty"]["all"]["baseline"]
+            )
+            * 100
         )
-        .update_layout(
-            xaxis_title="Household income decile",
-            yaxis_title="Distributional impact",
-            xaxis_tickvals=list(range(1, 11)),
-            xaxis_ticktext=list(range(1, 11)),
-            yaxis_tickformat=".0%",
-            template="plotly_white",
-            title="Relative impact by decile",
-        )
-        .update_traces(
-            marker_color=[get_bar_colour(v) for v in decile_impact.values()],
-            text=[f"{v:+.1%}" for v in decile_impact.values()],
-            textposition="inside",
-        )
-    )
-    decile_chart.update_layout(
-        showlegend=False,
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        hovermode=False,
-        margin=dict(r=100),
-    )
-    st.write(decile_chart)
+        if poverty_impact > 0:
+            sentence += f", raise poverty by {poverty_impact:.1%} ({absolute_poverty_impact:.1f} percentage points)"
+        elif poverty_impact < 0:
+            sentence += f", reduce poverty by {abs(poverty_impact):.1%} ({absolute_poverty_impact:.1f} percentage points)"
+        else:
+            sentence += ", have no impact on poverty"
 
-    poverty_impact = impact["poverty"]["poverty"]
-
-    labels = []
-    values = []
-    colour = []
-
-    for group in ["child", "adult", "senior", "all"]:
-        baseline = poverty_impact[group]["baseline"]
-        reformed = poverty_impact[group]["reform"]
-        labels.append(group)
-        values.append(reformed / baseline - 1)
-        colour.append(DARK_GREEN if reformed < baseline else DARK_GRAY)
-
-    poverty_chart = (
-        px.bar(
-            x=["Children", "Working-age adults", "Seniors", "All"],
-            y=values,
+        inequality_impact = (
+            impact["inequality"]["gini"]["reform"]
+            / impact["inequality"]["gini"]["baseline"]
+            - 1
         )
-        .update_layout(
-            xaxis_title="Group",
-            yaxis_title="Relative change in poverty",
-            yaxis_tickformat=".0%",
-            template="plotly_white",
-            title="Poverty impact",
+
+        if inequality_impact > 0:
+            sentence += f", and raise inequality by {inequality_impact:.1%}."
+        elif inequality_impact < 0:
+            sentence += (
+                f", and reduce inequality by {abs(inequality_impact):.1%}."
+            )
+        else:
+            sentence += ", and have no impact on inequality."
+
+        st.write(sentence)
+
+        decile_impact = impact["decile"]["relative"]
+        decile_impact = {int(k): v for k, v in decile_impact.items()}
+
+        def get_bar_colour(value):
+            if value > 0:
+                return DARK_GREEN
+            elif value <= 0:
+                return DARK_GRAY
+
+        decile_chart = (
+            px.bar(
+                x=list(decile_impact.keys()),
+                y=list(decile_impact.values()),
+            )
+            .update_layout(
+                xaxis_title="Household income decile",
+                yaxis_title="Distributional impact",
+                xaxis_tickvals=list(range(1, 11)),
+                xaxis_ticktext=list(range(1, 11)),
+                yaxis_tickformat=".0%",
+                template="plotly_white",
+                title="Relative impact by decile",
+            )
+            .update_traces(
+                marker_color=[
+                    get_bar_colour(v) for v in decile_impact.values()
+                ],
+                text=[f"{v:+.1%}" for v in decile_impact.values()],
+                textposition="inside",
+            )
         )
-        .update_traces(
-            marker_color=colour,
-            text=[f"{v:+.1%}" for v in values],
-            textposition="inside",
+        decile_chart.update_layout(
+            showlegend=False,
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            hovermode=False,
+            margin=dict(r=100),
         )
-    )
-    poverty_chart.update_layout(
-        showlegend=False,
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        hovermode=False,
-        margin=dict(r=100),
-    )
-    st.write(poverty_chart)
+        st.write(decile_chart)
+
+        poverty_impact = impact["poverty"]["poverty"]
+
+        labels = []
+        values = []
+        colour = []
+
+        for group in ["child", "adult", "senior", "all"]:
+            baseline = poverty_impact[group]["baseline"]
+            reformed = poverty_impact[group]["reform"]
+            labels.append(group)
+            values.append(reformed / baseline - 1)
+            colour.append(DARK_GREEN if reformed < baseline else DARK_GRAY)
+
+        poverty_chart = (
+            px.bar(
+                x=["Children", "Working-age adults", "Seniors", "All"],
+                y=values,
+            )
+            .update_layout(
+                xaxis_title="Group",
+                yaxis_title="Relative change in poverty",
+                yaxis_tickformat=".0%",
+                template="plotly_white",
+                title="Poverty impact",
+            )
+            .update_traces(
+                marker_color=colour,
+                text=[f"{v:+.1%}" for v in values],
+                textposition="inside",
+            )
+        )
+        poverty_chart.update_layout(
+            showlegend=False,
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            hovermode=False,
+            margin=dict(r=100),
+        )
+        st.write(poverty_chart)
 
 st.subheader("Reforms you've previously simulated")
 
