@@ -76,183 +76,194 @@ st.markdown(
 )
 
 with st.expander("Enter your household details"):
-    with st.form("household_details"):
-        brma_label = st.selectbox(
-            "What Broad Rental Market Area do you live in?",
-            [x["label"] for x in variables["BRMA"]["possibleValues"]],
+    brma_label = st.selectbox(
+        "What Broad Rental Market Area do you live in?",
+        [x["label"] for x in variables["BRMA"]["possibleValues"]],
+    )
+    brma = [
+        x["value"]
+        for x in variables["BRMA"]["possibleValues"]
+        if x["label"] == brma_label
+    ][0]
+    marital_status = st.selectbox(
+        "What is your marital status?", ["Single", "Married"]
+    )
+
+    people = {}
+    if marital_status == "Single":
+        age = st.slider(
+            "How old are you?", step=1, min_value=18, max_value=100, key="single_age"
         )
-        brma = [
-            x["value"]
-            for x in variables["BRMA"]["possibleValues"]
-            if x["label"] == brma_label
-        ][0]
-        marital_status = st.selectbox(
-            "What is your marital status?", ["Single", "Married"]
-        )
-
-        people = {}
-        if marital_status == "Single":
-            age = st.number_input(
-                "How old are you?", step=1, value=30, key="single_age"
-            )
-            if age < 65:
-                employment_income = st.slider(
-                    "What is your annual employment income?",
-                    min_value=0,
-                    max_value=100000,
-                    step=1000,
-                    key="single_employment_income",
-                )
-                state_pension = 0
-                pension_income = 0
-            else:
-                employment_income = 0
-                state_pension = st.slider(
-                    "What is your annual state pension?",
-                    min_value=0,
-                    max_value=10000,
-                    step=100,
-                    key="single_state_pension",
-                )
-                pension_income = st.slider(
-                    "What is your annual pension income?",
-                    min_value=0,
-                    max_value=10000,
-                    step=100,
-                    key="single_pension_income",
-                )
-            people["adult_1"] = {
-                "age": {2023: age},
-                "employment_income": {2023: employment_income},
-                "state_pension": {2023: state_pension},
-                "pension_income": {2023: pension_income},
-            }
-        else:
-            age = st.number_input(
-                "How old are you?", step=1, value=30, key="married_age"
-            )
-            if age < 65:
-                employment_income = st.slider(
-                    "What is your annual employment income?",
-                    min_value=0,
-                    max_value=100000,
-                    step=1000,
-                    key="married_employment_income",
-                )
-                state_pension = 0
-                pension_income = 0
-            else:
-                employment_income = 0
-                state_pension = st.slider(
-                    "What is your annual state pension?",
-                    min_value=0,
-                    max_value=10000,
-                    step=100,
-                    key="married_state_pension",
-                )
-                pension_income = st.slider(
-                    "What is your annual pension income?",
-                    min_value=0,
-                    max_value=10000,
-                    step=100,
-                    key="married_pension_income",
-                )
-
-            people["adult_1"] = {
-                "age": {2023: age},
-                "employment_income": {2023: employment_income},
-                "state_pension": {2023: state_pension},
-                "pension_income": {2023: pension_income},
-            }
-
-            partner_age = st.number_input(
-                "How old is your partner?",
-                step=1,
-                value=30,
-                key="married_partner_age",
-            )
-            if partner_age < 65:
-                partner_employment_income = st.slider(
-                    "What is your partner's annual employment income?",
-                    min_value=0,
-                    max_value=100000,
-                    step=1000,
-                    key="married_partner_employment_income",
-                )
-                partner_state_pension = 0
-                partner_pension_income = 0
-            else:
-                partner_employment_income = 0
-                partner_state_pension = st.slider(
-                    "What is your partner's annual state pension?",
-                    min_value=0,
-                    max_value=10000,
-                    step=100,
-                    key="married_partner_state_pension",
-                )
-                partner_pension_income = st.slider(
-                    "What is your partner's annual pension income?",
-                    min_value=0,
-                    max_value=10000,
-                    step=100,
-                    key="married_partner_pension_income",
-                )
-            people["adult_2"] = {
-                "age": {2023: age},
-                "employment_income": {2023: partner_employment_income},
-                "state_pension": {2023: partner_state_pension},
-                "pension_income": {2023: partner_pension_income},
-            }
-
-        children = st.number_input(
-            "How many children live in your household?", step=1
-        )
-
-        for i in range(children):
-            age = st.number_input(f"How old is child {i+1}?", step=1, value=10)
-            people[f"child_{i+1}"] = {
-                "age": {2023: age},
-            }
-
-        full_rate_consumption = (
-            st.slider(
-                f"How much do you spend per year?",
+        if age < 65:
+            employment_income = st.slider(
+                "What is your annual employment income?",
                 min_value=0,
-                max_value=100000,
-                step=100,
-                key="full_rate_consumption",
+                max_value=100_000,
+                step=1000,
+                key="single_employment_income",
+                format="£%d",
             )
-            * 0.5
-        )
-
-        total_wealth = st.slider(
-            f"How much wealth do you have?",
-            min_value=0,
-            max_value=10_000_000,
-            step=1000,
-            key="total_wealth",
-        )
-
-        situation = {
-            "people": people,
-            "benunits": {
-                "benunit": {
-                    "members": list(people.keys()),
-                }
-            },
-            "households": {
-                "household": {
-                    "members": list(people.keys()),
-                    "BRMA": {2023: brma},
-                    "full_rate_vat_consumption": {2023: full_rate_consumption},
-                    "total_wealth": {2023: total_wealth},
-                    "household_net_income": {2023: None},
-                    "household_benefits": {2023: None},
-                    "household_tax": {2023: None},
-                },
-            },
+            state_pension = 0
+            pension_income = 0
+        else:
+            employment_income = 0
+            state_pension = st.slider(
+                "What is your annual state pension?",
+                min_value=0,
+                max_value=100_000,
+                step=100,
+                key="single_state_pension",
+                format="£%d",
+            )
+            pension_income = st.slider(
+                "What is your annual pension income?",
+                min_value=0,
+                max_value=100_000,
+                step=100,
+                key="single_pension_income",
+                format="£%d",
+            )
+        people["adult_1"] = {
+            "age": {2023: age},
+            "employment_income": {2023: employment_income},
+            "state_pension": {2023: state_pension},
+            "pension_income": {2023: pension_income},
         }
-        st.form_submit_button("I'm finished with my household")
+    else:
+        age = st.slider(
+            "How old are you?", step=1, min_value=18, max_value=100, key="single_age"
+        )
+        if age < 65:
+            employment_income = st.slider(
+                "What is your annual employment income?",
+                min_value=0,
+                max_value=100_000,
+                step=1000,
+                key="married_employment_income",
+                format="£%d",
+            )
+            state_pension = 0
+            pension_income = 0
+        else:
+            employment_income = 0
+            state_pension = st.slider(
+                "What is your annual state pension?",
+                min_value=0,
+                max_value=100_000,
+                step=100,
+                key="married_state_pension",
+                format="£%d",
+            )
+            pension_income = st.slider(
+                "What is your annual pension income?",
+                min_value=0,
+                max_value=100_000,
+                step=100,
+                key="married_pension_income",
+                format="£%d",
+            )
+
+        people["adult_1"] = {
+            "age": {2023: age},
+            "employment_income": {2023: employment_income},
+            "state_pension": {2023: state_pension},
+            "pension_income": {2023: pension_income},
+        }
+
+        partner_age = st.slider(
+            "How old is your partner?",
+            step=1,
+            min_value=18,
+            max_value=100,
+            value=people["adult_1"]["age"][2023],
+            key="married_partner_age",
+        )
+        if partner_age < 65:
+            partner_employment_income = st.slider(
+                "What is your partner's annual employment income?",
+                min_value=0,
+                max_value=100_000,
+                step=1000,
+                key="married_partner_employment_income",
+                format="£%d",
+            )
+            partner_state_pension = 0
+            partner_pension_income = 0
+        else:
+            partner_employment_income = 0
+            partner_state_pension = st.slider(
+                "What is your partner's annual state pension?",
+                min_value=0,
+                max_value=100_000,
+                step=100,
+                key="married_partner_state_pension",
+                format="£%d",
+            )
+            partner_pension_income = st.slider(
+                "What is your partner's annual pension income?",
+                min_value=0,
+                max_value=100_000,
+                step=100,
+                key="married_partner_pension_income",
+                format="£%d",
+            )
+        people["adult_2"] = {
+            "age": {2023: age},
+            "employment_income": {2023: partner_employment_income},
+            "state_pension": {2023: partner_state_pension},
+            "pension_income": {2023: partner_pension_income},
+        }
+
+    children = st.number_input(
+        "How many children live in your household?", step=1
+    )
+
+    for i in range(children):
+        age = st.slider(f"How old is child {i+1}?", step=1, min_value=0, max_value=18, value=10)
+        people[f"child_{i+1}"] = {
+            "age": {2023: age},
+        }
+
+    full_rate_consumption = (
+        st.slider(
+            f"How much do you spend per year?",
+            min_value=0,
+            max_value=100_000,
+            step=100,
+            key="full_rate_consumption",
+            format="£%d",
+        )
+        * 0.5
+    )
+
+    total_wealth = st.slider(
+        f"How much wealth do you have?",
+        min_value=0,
+        max_value=10_000_000,
+        step=1000,
+        key="total_wealth",
+        format="£%d",
+    )
+
+    situation = {
+        "people": people,
+        "benunits": {
+            "benunit": {
+                "members": list(people.keys()),
+            }
+        },
+        "households": {
+            "household": {
+                "members": list(people.keys()),
+                "BRMA": {2023: brma},
+                "full_rate_vat_consumption": {2023: full_rate_consumption},
+                "total_wealth": {2023: total_wealth},
+                "household_net_income": {2023: None},
+                "household_benefits": {2023: None},
+                "household_tax": {2023: None},
+            },
+        },
+    }
 
 
 def invert_dict(d):
@@ -260,146 +271,143 @@ def invert_dict(d):
 
 
 with st.expander("Select a tax-benefit reform"):
-    with st.form("tax_benefit_reform"):
-        st.write("Should the government...")
-        basic_rate_map = {
-            "lower to 18%": 0.18,
-            "lower to 19%": 0.19,
-            "keep the same": 0.2,
-            "raise to 21%": 0.21,
-            "raise to 22%": 0.22,
-        }
-        basic_rate = st.select_slider(
-            "change the basic rate of income tax?",
-            options=basic_rate_map.keys(),
-            value="keep the same",
-        )
-        basic_rate = basic_rate_map[basic_rate]
-        higher_rate_map = {
-            "cut both by 5p": 0.35,
-            "cut the higher rate by 5p": 0.35,
-            "keep the same": 0.4,
-            "raise the additional rate by 5p": 0.44,
-            "raise the higher/additional rates by 5p": 0.45,
-        }
-        progressivity = st.select_slider(
-            "change the higher and additional rates?",
-            options=higher_rate_map.keys(),
-            value="keep the same",
-        )
-        higher_rate = higher_rate_map[progressivity]
-        additional_rate_map = {
-            "cut both by 5p": 0.4,
-            "cut the higher rate by 5p": 0.45,
-            "keep the same": 0.45,
-            "raise the additional rate by 5p": 0.5,
-            "raise the higher/additional rates by 5p": 0.5,
-        }
-        additional_rate = additional_rate_map[progressivity]
-        vat_map = {
-            "lower to 15%": 0.15,
-            "lower to 17.5%": 0.175,
-            "keep the same": 0.2,
-            "raise to 22.5%": 0.225,
-            "raise to 25%": 0.25,
-        }
-        vat = st.select_slider(
-            "change the VAT rate?",
-            options=vat_map.keys(),
-            value="keep the same",
-        )
-        vat = vat_map[vat]
-        wealth_tax_map = {
-            "no": (0, 0),
-            "1% over £1m": (0.01, 1_000_000),
-            "2% over £1m": (0.02, 1_000_000),
-            "1% flat": (0.01, 0),
-            "2% flat": (0.02, 0),
-        }
-        wealth_tax = st.select_slider(
-            "introduce a wealth tax?",
-            options=wealth_tax_map.keys(),
-            value="no",
-        )
-        wealth_tax = wealth_tax_map[wealth_tax]
-        benefits_map = {
-            "decrease by 10%": -0.1,
-            "decrease by 5%": -0.05,
-            "no": 0,
-            "increase by 5%": 0.05,
-            "increase by 10%": 0.1,
-        }
-        benefits = st.select_slider(
-            "change benefits?",
-            options=["no", "decrease by 5%", "increase by 5%"],
-            value="no",
-        )
-        benefits = benefits_map[benefits]
-        ubi_map = {"no": 0, "£10 per week": 10, "£30 per week": 30}
-        ubi = st.select_slider(
-            "introduce a universal basic income?",
-            options=["no", "£10 per week", "£30 per week"],
-            value="no",
-        )
-        ubi = ubi_map[ubi]
+    st.write("Should the government...")
+    basic_rate_map = {
+        "lower to 18%": 0.18,
+        "lower to 19%": 0.19,
+        "keep the same": 0.2,
+        "raise to 21%": 0.21,
+        "raise to 22%": 0.22,
+    }
+    basic_rate = st.select_slider(
+        "change the basic rate of income tax?",
+        options=basic_rate_map.keys(),
+        value="keep the same",
+    )
+    basic_rate = basic_rate_map[basic_rate]
+    higher_rate_map = {
+        "cut both by 5p": 0.35,
+        "cut the higher rate by 5p": 0.35,
+        "keep the same": 0.4,
+        "raise the additional rate by 5p": 0.44,
+        "raise the higher/additional rates by 5p": 0.45,
+    }
+    progressivity = st.select_slider(
+        "change the higher and additional rates?",
+        options=higher_rate_map.keys(),
+        value="keep the same",
+    )
+    higher_rate = higher_rate_map[progressivity]
+    additional_rate_map = {
+        "cut both by 5p": 0.4,
+        "cut the higher rate by 5p": 0.45,
+        "keep the same": 0.45,
+        "raise the additional rate by 5p": 0.5,
+        "raise the higher/additional rates by 5p": 0.5,
+    }
+    additional_rate = additional_rate_map[progressivity]
+    vat_map = {
+        "lower to 15%": 0.15,
+        "lower to 17.5%": 0.175,
+        "keep the same": 0.2,
+        "raise to 22.5%": 0.225,
+        "raise to 25%": 0.25,
+    }
+    vat = st.select_slider(
+        "change the VAT rate?",
+        options=vat_map.keys(),
+        value="keep the same",
+    )
+    vat = vat_map[vat]
+    wealth_tax_map = {
+        "no": (0, 0),
+        "1% over £1m": (0.01, 1_000_000),
+        "2% over £1m": (0.02, 1_000_000),
+        "1% flat": (0.01, 0),
+        "2% flat": (0.02, 0),
+    }
+    wealth_tax = st.select_slider(
+        "introduce a wealth tax?",
+        options=wealth_tax_map.keys(),
+        value="no",
+    )
+    wealth_tax = wealth_tax_map[wealth_tax]
+    benefits_map = {
+        "decrease by 10%": -0.1,
+        "decrease by 5%": -0.05,
+        "no": 0,
+        "increase by 5%": 0.05,
+        "increase by 10%": 0.1,
+    }
+    benefits = st.select_slider(
+        "change benefits?",
+        options=["no", "decrease by 5%", "increase by 5%"],
+        value="no",
+    )
+    benefits = benefits_map[benefits]
+    ubi_map = {"no": 0, "£10 per week": 10, "£30 per week": 30}
+    ubi = st.select_slider(
+        "introduce a universal basic income?",
+        options=["no", "£10 per week", "£30 per week"],
+        value="no",
+    )
+    ubi = ubi_map[ubi]
 
-        reform = {
-            "gov.hmrc.income_tax.rates.uk[0].rate": {
-                "2023-01-01.2024-01-01": basic_rate
-            },
-            "gov.hmrc.income_tax.rates.uk[1].rate": {
-                "2023-01-01.2024-01-01": higher_rate
-            },
-            "gov.hmrc.income_tax.rates.uk[2].rate": {
-                "2023-01-01.2024-01-01": additional_rate
-            },
-            "gov.contrib.ubi_center.wealth_tax[0].rate": {
-                "2023-01-01.2024-01-01": wealth_tax[0]
-            },
-            "gov.contrib.ubi_center.wealth_tax[0].threshold": {
-                "2023-01-01.2024-01-01": wealth_tax[1]
-            },
-            "gov.contrib.ubi_center.basic_income.amount.flat": {
-                "2023-01-01.2024-01-01": ubi
-            },
-            "gov.contrib.benefit_uprating.non_sp": {
-                "2023-01-01.2024-01-01": benefits
-            },
-            "gov.hmrc.vat.standard_rate": {"2023-01-01.2024-01-01": vat},
-        }
+    reform = {
+        "gov.hmrc.income_tax.rates.uk[0].rate": {
+            "2023-01-01.2024-01-01": basic_rate
+        },
+        "gov.hmrc.income_tax.rates.uk[1].rate": {
+            "2023-01-01.2024-01-01": higher_rate
+        },
+        "gov.hmrc.income_tax.rates.uk[2].rate": {
+            "2023-01-01.2024-01-01": additional_rate
+        },
+        "gov.contrib.ubi_center.wealth_tax[0].rate": {
+            "2023-01-01.2024-01-01": wealth_tax[0]
+        },
+        "gov.contrib.ubi_center.wealth_tax[0].threshold": {
+            "2023-01-01.2024-01-01": wealth_tax[1]
+        },
+        "gov.contrib.ubi_center.basic_income.amount.flat": {
+            "2023-01-01.2024-01-01": ubi
+        },
+        "gov.contrib.benefit_uprating.non_sp": {
+            "2023-01-01.2024-01-01": benefits
+        },
+        "gov.hmrc.vat.standard_rate": {"2023-01-01.2024-01-01": vat},
+    }
 
-        reform = {
-            "data": reform,
-        }
+    reform = {
+        "data": reform,
+    }
 
-        reform_details = {
-            "Should the government change the basic rate of income tax?": invert_dict(
-                basic_rate_map
-            )[
-                basic_rate
-            ],
-            "Should the government change the higher and additional rates?": invert_dict(
-                higher_rate_map
-            )[
-                higher_rate
-            ],
-            "Should the government change the VAT rate?": invert_dict(vat_map)[
-                vat
-            ],
-            "Should the government introduce a wealth tax?": invert_dict(
-                wealth_tax_map
-            )[wealth_tax],
-            "Should the government change benefits?": invert_dict(
-                benefits_map
-            )[benefits],
-            "Should the government introduce a universal basic income?": invert_dict(
-                ubi_map
-            )[
-                ubi
-            ],
-        }
-
-        st.form_submit_button("I'm finished with my reform")
+    reform_details = {
+        "Should the government change the basic rate of income tax?": invert_dict(
+            basic_rate_map
+        )[
+            basic_rate
+        ],
+        "Should the government change the higher and additional rates?": invert_dict(
+            higher_rate_map
+        )[
+            higher_rate
+        ],
+        "Should the government change the VAT rate?": invert_dict(vat_map)[
+            vat
+        ],
+        "Should the government introduce a wealth tax?": invert_dict(
+            wealth_tax_map
+        )[wealth_tax],
+        "Should the government change benefits?": invert_dict(
+            benefits_map
+        )[benefits],
+        "Should the government introduce a universal basic income?": invert_dict(
+            ubi_map
+        )[
+            ubi
+        ],
+    }
 
 
 @st.cache(show_spinner=False)
@@ -420,9 +428,8 @@ def get_household_impact(household, reform):
         ).json()["result"]
         return baseline, reformed
 
-
-baseline, reformed = get_household_impact(situation, reform["data"])
 st.write("## Your household's impact")
+baseline, reformed = get_household_impact(situation, reform["data"])
 
 baseline_net_income = baseline["households"]["household"][
     "household_net_income"
@@ -505,7 +512,6 @@ def get_economic_impact(reform):
 
 with st.expander("See the economic impact"):
     try:
-        raise Exception()
         impact = get_economic_impact(reform)
     except:
         st.error(
