@@ -6,7 +6,7 @@ import datetime
 import humanize
 import dateutil
 
-API = "http://127.0.0.1:5000/uk"
+API = "https://api.policyengine.org/uk"
 
 
 @st.cache(show_spinner=False)
