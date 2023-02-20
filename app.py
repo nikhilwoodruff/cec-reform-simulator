@@ -5,6 +5,7 @@ import plotly.express as px
 import datetime
 import humanize
 import dateutil
+import pandas as pd
 
 API = "https://api.policyengine.org/uk"
 
@@ -92,7 +93,11 @@ with st.expander("Enter your household details"):
     people = {}
     if marital_status == "Single":
         age = st.slider(
-            "How old are you?", step=1, min_value=18, max_value=100, key="single_age"
+            "How old are you?",
+            step=1,
+            min_value=18,
+            max_value=100,
+            key="single_age",
         )
         if age < 65:
             employment_income = st.slider(
@@ -131,7 +136,11 @@ with st.expander("Enter your household details"):
         }
     else:
         age = st.slider(
-            "How old are you?", step=1, min_value=18, max_value=100, key="single_age"
+            "How old are you?",
+            step=1,
+            min_value=18,
+            max_value=100,
+            key="single_age",
         )
         if age < 65:
             employment_income = st.slider(
@@ -219,7 +228,13 @@ with st.expander("Enter your household details"):
     )
 
     for i in range(children):
-        age = st.slider(f"How old is child {i+1}?", step=1, min_value=0, max_value=18, value=10)
+        age = st.slider(
+            f"How old is child {i+1}?",
+            step=1,
+            min_value=0,
+            max_value=18,
+            value=10,
+        )
         people[f"child_{i+1}"] = {
             "age": {2023: age},
         }
@@ -399,9 +414,9 @@ with st.expander("Select a tax-benefit reform"):
         "Should the government introduce a wealth tax?": invert_dict(
             wealth_tax_map
         )[wealth_tax],
-        "Should the government change benefits?": invert_dict(
-            benefits_map
-        )[benefits],
+        "Should the government change benefits?": invert_dict(benefits_map)[
+            benefits
+        ],
         "Should the government introduce a universal basic income?": invert_dict(
             ubi_map
         )[
@@ -427,6 +442,7 @@ def get_household_impact(household, reform):
             },
         ).json()["result"]
         return baseline, reformed
+
 
 st.write("## Your household's impact")
 baseline, reformed = get_household_impact(situation, reform["data"])
@@ -659,3 +675,122 @@ for data in sorted(st.session_state["history"], key=lambda x: x["timestamp"]):
         f"You simulated a policy that {message} ({time_message})"
     ):
         st.json(data["reform_details"], expanded=True)
+
+st.subheader("Impacts on example households")
+
+with st.expander("See the impact on 10 example households"):
+    households = {
+        "Single adult, £10k earnings": {
+            "people": {
+                "adult": {
+                    "employment_income": {2023: 10_000},
+                    "age": {2023: 30},
+                },
+            },
+            "benunits": {
+                "benunit": {
+                    "members": ["adult"],
+                },
+            },
+            "households": {
+                "household": {
+                    "members": ["adult"],
+                    "household_net_income": {2023: None},
+                },
+            },
+        },
+        "Single adult, £30k earnings": {
+            "people": {
+                "adult": {
+                    "employment_income": {2023: 30_000},
+                    "age": {2023: 30},
+                },
+            },
+            "benunits": {
+                "benunit": {
+                    "members": ["adult"],
+                },
+            },
+            "households": {
+                "household": {
+                    "members": ["adult"],
+                    "household_net_income": {2023: None},
+                },
+            },
+        },
+        "Single adult, £80k earnings": {
+            "people": {
+                "adult": {
+                    "employment_income": {2023: 80_000},
+                    "age": {2023: 30},
+                },
+            },
+            "benunits": {
+                "benunit": {
+                    "members": ["adult"],
+                },
+            },
+            "households": {
+                "household": {
+                    "members": ["adult"],
+                    "household_net_income": {2023: None},
+                },
+            },
+        },
+    }
+
+    def get_households_impact():
+        with st.spinner("Calculating impacts for example households..."):
+            names = []
+            baseline_incomes = []
+            reform_incomes = []
+            for name in households:
+                baseline = requests.post(
+                    API + "/calculate",
+                    json={
+                        "household": households[name],
+                    },
+                ).json()["result"]
+                reformed = requests.post(
+                    API + "/calculate",
+                    json={
+                        "household": households[name],
+                        "policy": reform["data"],
+                    },
+                ).json()["result"]
+                names.append(name)
+                baseline_incomes.append(
+                    baseline["households"]["household"][
+                        "household_net_income"
+                    ]["2023"]
+                )
+                reform_incomes.append(
+                    reformed["households"]["household"][
+                        "household_net_income"
+                    ]["2023"]
+                )
+
+            df = pd.DataFrame(
+                {
+                    "Household": names,
+                    "Baseline net income": baseline_incomes,
+                    "Reformed net income": reform_incomes,
+                }
+            )
+
+            df["Net income change"] = (
+                df["Reformed net income"] - df["Baseline net income"]
+            )
+
+            for variable in [
+                "Baseline net income",
+                "Reformed net income",
+                "Net income change",
+            ]:
+                df[variable] = df[variable].apply(
+                    lambda x: f"{'-' if x < 0 else ''}£{abs(x):,.2f}"
+                )
+            return df.set_index("Household")
+
+    df = get_households_impact()
+    st.write(df)
