@@ -6,11 +6,16 @@ import datetime
 import humanize
 import dateutil
 import pandas as pd
+from example_households import (
+    HIGH_EARNING_NUCLEAR_FAMILY,
+    ELDERLY_MAN_WITH_CARER,
+    SINGLE_WOMAN_LONDON_HOUSE_SHARE,
+    SINGLE_MOTHER_WITH_TWO_CHILDREN,
+)
 
 API = "https://api.policyengine.org/uk"
 
 
-@st.cache(show_spinner=False)
 def get_metadata():
     return requests.get(API + "/metadata").json()["result"]
 
@@ -425,7 +430,6 @@ with st.expander("Select a tax-benefit reform"):
     }
 
 
-@st.cache(show_spinner=False)
 def get_household_impact(household, reform):
     with st.spinner("Computing the impact on your household..."):
         baseline = requests.post(
@@ -509,7 +513,7 @@ st.session_state["history"].append(
 )
 
 
-@st.cache(show_spinner=False)
+@st.cache_resource(show_spinner=False)
 def get_economic_impact(reform):
     with st.spinner("Computing the economic impact..."):
         policy_id = requests.post(API + "/policy", json=reform).json()[
@@ -524,6 +528,74 @@ def get_economic_impact(reform):
                 API + f"/economy/{policy_id}/over/1?region=uk&time_period=2023"
             ).json()
         return impact["result"]
+
+
+st.subheader("Impacts on example households")
+
+with st.expander("See the impact on 10 example households"):
+    households = {
+        "High-earning couple with two children": HIGH_EARNING_NUCLEAR_FAMILY,
+        "Elderly man with carer son": ELDERLY_MAN_WITH_CARER,
+        "Single woman in London": SINGLE_WOMAN_LONDON_HOUSE_SHARE,
+        "Single mother with two children": SINGLE_MOTHER_WITH_TWO_CHILDREN,
+    }
+
+    @st.cache_data(show_spinner=False)
+    def get_households_impact(reform):
+        with st.spinner("Calculating impacts for example households..."):
+            names = []
+            baseline_incomes = []
+            reform_incomes = []
+            for name in households:
+                baseline = requests.post(
+                    API + "/calculate",
+                    json={
+                        "household": households[name],
+                    },
+                ).json()["result"]
+                reformed = requests.post(
+                    API + "/calculate",
+                    json={
+                        "household": households[name],
+                        "policy": reform["data"],
+                    },
+                ).json()["result"]
+                names.append(name)
+                baseline_incomes.append(
+                    baseline["households"]["household"][
+                        "household_net_income"
+                    ]["2023"]
+                )
+                reform_incomes.append(
+                    reformed["households"]["household"][
+                        "household_net_income"
+                    ]["2023"]
+                )
+
+            df = pd.DataFrame(
+                {
+                    "Household": names,
+                    "Baseline net income": baseline_incomes,
+                    "Reformed net income": reform_incomes,
+                }
+            )
+
+            df["Net income change"] = (
+                df["Reformed net income"] - df["Baseline net income"]
+            )
+
+            for variable in [
+                "Baseline net income",
+                "Reformed net income",
+                "Net income change",
+            ]:
+                df[variable] = df[variable].apply(
+                    lambda x: f"{'-' if x < 0 else ''}£{abs(x):,.2f}"
+                )
+            return df.set_index("Household")
+
+    df = get_households_impact(reform)
+    st.write(df)
 
 
 with st.expander("See the economic impact"):
@@ -675,122 +747,3 @@ for data in sorted(st.session_state["history"], key=lambda x: x["timestamp"]):
         f"You simulated a policy that {message} ({time_message})"
     ):
         st.json(data["reform_details"], expanded=True)
-
-st.subheader("Impacts on example households")
-
-with st.expander("See the impact on 10 example households"):
-    households = {
-        "Single adult, £10k earnings": {
-            "people": {
-                "adult": {
-                    "employment_income": {2023: 10_000},
-                    "age": {2023: 30},
-                },
-            },
-            "benunits": {
-                "benunit": {
-                    "members": ["adult"],
-                },
-            },
-            "households": {
-                "household": {
-                    "members": ["adult"],
-                    "household_net_income": {2023: None},
-                },
-            },
-        },
-        "Single adult, £30k earnings": {
-            "people": {
-                "adult": {
-                    "employment_income": {2023: 30_000},
-                    "age": {2023: 30},
-                },
-            },
-            "benunits": {
-                "benunit": {
-                    "members": ["adult"],
-                },
-            },
-            "households": {
-                "household": {
-                    "members": ["adult"],
-                    "household_net_income": {2023: None},
-                },
-            },
-        },
-        "Single adult, £80k earnings": {
-            "people": {
-                "adult": {
-                    "employment_income": {2023: 80_000},
-                    "age": {2023: 30},
-                },
-            },
-            "benunits": {
-                "benunit": {
-                    "members": ["adult"],
-                },
-            },
-            "households": {
-                "household": {
-                    "members": ["adult"],
-                    "household_net_income": {2023: None},
-                },
-            },
-        },
-    }
-
-    def get_households_impact():
-        with st.spinner("Calculating impacts for example households..."):
-            names = []
-            baseline_incomes = []
-            reform_incomes = []
-            for name in households:
-                baseline = requests.post(
-                    API + "/calculate",
-                    json={
-                        "household": households[name],
-                    },
-                ).json()["result"]
-                reformed = requests.post(
-                    API + "/calculate",
-                    json={
-                        "household": households[name],
-                        "policy": reform["data"],
-                    },
-                ).json()["result"]
-                names.append(name)
-                baseline_incomes.append(
-                    baseline["households"]["household"][
-                        "household_net_income"
-                    ]["2023"]
-                )
-                reform_incomes.append(
-                    reformed["households"]["household"][
-                        "household_net_income"
-                    ]["2023"]
-                )
-
-            df = pd.DataFrame(
-                {
-                    "Household": names,
-                    "Baseline net income": baseline_incomes,
-                    "Reformed net income": reform_incomes,
-                }
-            )
-
-            df["Net income change"] = (
-                df["Reformed net income"] - df["Baseline net income"]
-            )
-
-            for variable in [
-                "Baseline net income",
-                "Reformed net income",
-                "Net income change",
-            ]:
-                df[variable] = df[variable].apply(
-                    lambda x: f"{'-' if x < 0 else ''}£{abs(x):,.2f}"
-                )
-            return df.set_index("Household")
-
-    df = get_households_impact()
-    st.write(df)
