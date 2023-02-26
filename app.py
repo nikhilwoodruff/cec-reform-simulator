@@ -361,7 +361,7 @@ with st.expander("Select a tax-benefit reform"):
     }
     benefits = st.select_slider(
         "change benefits?",
-        options=["no", "decrease by 5%", "increase by 5%"],
+        options=["decrease by 5%", "no", "increase by 5%"],
         value="no",
     )
     benefits = benefits_map[benefits]
