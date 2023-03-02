@@ -383,10 +383,10 @@ with st.expander("Select a tax-benefit reform"):
         "gov.hmrc.income_tax.rates.uk[2].rate": {
             "2023-01-01.2024-01-01": additional_rate
         },
-        "gov.contrib.ubi_center.wealth_tax[0].rate": {
+        "gov.contrib.cec.non_primary_residence_wealth_tax[0].rate": {
             "2023-01-01.2024-01-01": wealth_tax[0]
         },
-        "gov.contrib.ubi_center.wealth_tax[0].threshold": {
+        "gov.contrib.cec.non_primary_residence_wealth_tax[0].threshold": {
             "2023-01-01.2024-01-01": wealth_tax[1]
         },
         "gov.contrib.ubi_center.basic_income.amount.flat": {
