@@ -81,9 +81,9 @@ ELDERLY_MAN_WITH_CARER = {
             "local_authority": {"2023": "NORTH_DEVON"},
             "region": {"2023": "SOUTH_WEST"},
             "tenure_type": {"2023": "RENT_FROM_COUNCIL"},
-            "consumption": {"2023": 15_000 },
-            "full_rate_vat_consumption": {"2023": 15_000 * 0.65 },
-            "total_wealth": {"2023": 10_000 },
+            "consumption": {"2023": 15_000},
+            "full_rate_vat_consumption": {"2023": 15_000 * 0.65},
+            "total_wealth": {"2023": 10_000},
             "household_net_income": {"2023": None},
             "household_benefits": {"2023": None},
             "household_tax": {"2023": None},
@@ -118,9 +118,9 @@ SINGLE_WOMAN_LONDON_HOUSE_SHARE = {
             "BRMA": {"2023": "INNER_NORTH_LONDON"},
             "local_authority": {"2023": "HACKNEY"},
             "region": {"2023": "LONDON"},
-            "consumption": {"2023": 20_000 },
-            "full_rate_vat_consumption": {"2023": 20_000 * 0.6 },
-            "total_wealth": {"2023": 20_000 },
+            "consumption": {"2023": 20_000},
+            "full_rate_vat_consumption": {"2023": 20_000 * 0.6},
+            "total_wealth": {"2023": 20_000},
             "household_net_income": {"2023": None},
             "household_benefits": {"2023": None},
             "household_tax": {"2023": None},
@@ -163,12 +163,149 @@ SINGLE_MOTHER_WITH_TWO_CHILDREN = {
             "BRMA": {"2023": "CENTRAL_GREATER_MANCHESTER"},
             "local_authority": {"2023": "MANCHESTER"},
             "region": {"2023": "NORTH_WEST"},
-            "consumption": {"2023": 20_000 },
-            "full_rate_vat_consumption": {"2023": 20_000 * 0.6 },
-            "total_wealth": {"2023": 100_000 },
+            "consumption": {"2023": 20_000},
+            "full_rate_vat_consumption": {"2023": 20_000 * 0.6},
+            "total_wealth": {"2023": 100_000},
             "household_net_income": {"2023": None},
             "household_benefits": {"2023": None},
             "household_tax": {"2023": None},
         },
+    },
+}
+
+SINGLE_ADULT_20K = {
+    "people": {
+        "you": {"age": {"2023": "24"}, "employment_income": {"2023": "20000"}}
+    },
+    "benunits": {"your immediate family": {"members": ["you"]}},
+    "households": {
+        "your household": {
+            "members": ["you"],
+            "consumption": {"2023": 14_000},
+            "full_rate_vat_consumption": {"2023": 14_000 * 0.6},
+            "total_wealth": {"2023": 10_000},
+            "household_net_income": {"2023": None},
+            "household_benefits": {"2023": None},
+            "household_tax": {"2023": None},
+        }
+    },
+}
+MARRIED_COUPLE_TWO_KIDS_BOTH_30K = {
+    "people": {
+        "you": {"employment_income": {"2023": "30000"}},
+        "your partner": {"employment_income": {"2023": "40000"}},
+        "your first child": {"age": {"2023": 10}},
+        "your second child": {"age": {"2023": 8}},
+    },
+    "benunits": {
+        "your immediate family": {
+            "members": [
+                "you",
+                "your partner",
+                "your first child",
+                "your second child",
+            ],
+            "is_married": {"2023": True},
+        }
+    },
+    "households": {
+        "your household": {
+            "members": [
+                "you",
+                "your partner",
+                "your first child",
+                "your second child",
+            ],
+            "consumption": {"2023": 50000},
+            "full_rate_vat_consumption": {"2023": 50000 * 0.6},
+            "total_wealth": {"2023": 150_000},
+            "household_net_income": {"2023": None},
+            "household_benefits": {"2023": None},
+            "household_tax": {"2023": None},
+        }
+    },
+}
+SINGLE_PENSIONER_25K_PENSION_INCOME = {
+    "people": {
+        "you": {"age": {"2023": "70"}, "pension_income": {"2023": "25000"}}
+    },
+    "benunits": {"your immediate family": {"members": ["you"]}},
+    "households": {
+        "your household": {
+            "members": ["you"],
+            "consumption": {"2023": 13_000},
+            "full_rate_vat_consumption": {"2023": 13_000 * 0.6},
+            "total_wealth": {"2023": 240_000},
+            "household_net_income": {"2023": None},
+            "household_benefits": {"2023": None},
+            "household_tax": {"2023": None},
+        }
+    },
+}
+MARRIED_PENSIONER_COUPLE_80K_PENSION_INCOME = {
+    "people": {
+        "you": {"age": {"2023": "70"}, "pension_income": {"2023": "40000"}},
+        "your partner": {
+            "age": {"2023": "65"},
+            "pension_income": {"2023": "40000"},
+        },
+    },
+    "benunits": {
+        "your immediate family": {
+            "members": ["you", "your partner"],
+            "is_married": {"2023": True},
+        }
+    },
+    "households": {
+        "your household": {
+            "members": ["you", "your partner"],
+            "consumption": {"2023": 60_000},
+            "full_rate_vat_consumption": {"2023": 23_000 * 0.4},
+            "total_wealth": {"2023": 1_200_000},
+            "household_net_income": {"2023": None},
+            "household_benefits": {"2023": None},
+            "household_tax": {"2023": None},
+        }
+    },
+}
+MARRIED_COUPLE_1_KID_1_EARNER = {
+    "people": {
+        "you": {"employment_income": {"2023": "35000"}},
+        "your partner": {},
+        "your first child": {"age": {"2023": 10}},
+    },
+    "benunits": {
+        "your immediate family": {
+            "members": ["you", "your partner", "your first child"],
+            "is_married": {"2023": True},
+        }
+    },
+    "households": {
+        "your household": {
+            "members": ["you", "your partner", "your first child"],
+            "consumption": {"2023": 30_000},
+            "full_rate_vat_consumption": {"2023": 30_000 * 0.7},
+            "total_wealth": {"2023": 240_000},
+            "household_net_income": {"2023": None},
+            "household_benefits": {"2023": None},
+            "household_tax": {"2023": None},
+        }
+    },
+}
+SINGLE_ADULT_HIGH_INCOME = {
+    "people": {
+        "you": {"age": {"2023": "55"}, "employment_income": {"2023": "60000"}}
+    },
+    "benunits": {"your immediate family": {"members": ["you"]}},
+    "households": {
+        "your household": {
+            "members": ["you"],
+            "consumption": {"2023": 40_000},
+            "full_rate_vat_consumption": {"2023": 40_000 * 0.4},
+            "total_wealth": {"2023": 1_100_000},
+            "household_net_income": {"2023": None},
+            "household_benefits": {"2023": None},
+            "household_tax": {"2023": None},
+        }
     },
 }

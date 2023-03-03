@@ -11,6 +11,12 @@ from example_households import (
     ELDERLY_MAN_WITH_CARER,
     SINGLE_WOMAN_LONDON_HOUSE_SHARE,
     SINGLE_MOTHER_WITH_TWO_CHILDREN,
+    SINGLE_ADULT_20K,
+    MARRIED_COUPLE_TWO_KIDS_BOTH_30K,
+    SINGLE_PENSIONER_25K_PENSION_INCOME,
+    MARRIED_PENSIONER_COUPLE_80K_PENSION_INCOME,
+    MARRIED_COUPLE_1_KID_1_EARNER,
+    SINGLE_ADULT_HIGH_INCOME,
 )
 
 API = "https://api.policyengine.org/uk"
@@ -264,6 +270,14 @@ with st.expander("Enter your household details"):
         key="total_wealth",
         format="£%d",
     )
+    main_residence_value = st.slider(
+        f"How much is your (owned) main residence worth?",
+        min_value=0,
+        max_value=2_000_000,
+        step=1000,
+        key="main_residence_value",
+        format="£%d",
+    )
 
     situation = {
         "people": people,
@@ -278,6 +292,7 @@ with st.expander("Enter your household details"):
                 "BRMA": {2023: brma},
                 "full_rate_vat_consumption": {2023: full_rate_consumption},
                 "total_wealth": {2023: total_wealth},
+                "main_residence_value": {2023: main_residence_value},
                 "household_net_income": {2023: None},
                 "household_benefits": {2023: None},
                 "household_tax": {2023: None},
@@ -341,10 +356,10 @@ with st.expander("Select a tax-benefit reform"):
     vat = vat_map[vat]
     wealth_tax_map = {
         "no": (0, 0),
+        "1% over £500k": (0.01, 500_000),
         "1% over £1m": (0.01, 1_000_000),
+        "2% over £500k": (0.02, 500_000),
         "2% over £1m": (0.02, 1_000_000),
-        "1% flat": (0.01, 0),
-        "2% flat": (0.02, 0),
     }
     wealth_tax = st.select_slider(
         "introduce a wealth tax?",
@@ -361,10 +376,48 @@ with st.expander("Select a tax-benefit reform"):
     }
     benefits = st.select_slider(
         "change benefits?",
-        options=["decrease by 5%", "no", "increase by 5%"],
+        options=[
+            "decrease by 10%",
+            "decrease by 5%",
+            "no",
+            "increase by 5%",
+            "increase by 10%",
+        ],
         value="no",
     )
     benefits = benefits_map[benefits]
+    state_pension_map = {
+        "decrease by 5%": -0.05,
+        "decrease by 1%": -0.01,
+        "no": 0,
+        "increase by 1%": 0.01,
+        "increase by 5%": 0.05,
+    }
+    state_pension = st.select_slider(
+        "change the state pension?",
+        options=[
+            "decrease by 5%",
+            "decrease by 1%",
+            "no",
+            "increase by 1%",
+            "increase by 5%",
+        ],
+        value="no",
+    )
+    state_pension = state_pension_map[state_pension]
+    ebr_map = {
+        "no": 0,
+        "£100": 100,
+        "£200": 200,
+        "£300": 300,
+        "£400": 400,
+    }
+    ebr = st.select_slider(
+        "discount energy bills by a flat amount, similar to the 2022 Energy Bills Credit?",
+        options=["no", "£100", "£200", "£300", "£400"],
+        value="no",
+    )
+    ebr = ebr_map[ebr]
     ubi_map = {"no": 0, "£10 per week": 10, "£30 per week": 30}
     ubi = st.select_slider(
         "introduce a universal basic income?",
@@ -395,6 +448,12 @@ with st.expander("Select a tax-benefit reform"):
         "gov.contrib.benefit_uprating.non_sp": {
             "2023-01-01.2024-01-01": benefits
         },
+        "gov.contrib.cec.state_pension_increase": {
+            "2023-01-01.2024-01-01": state_pension
+        },
+        "gov.treasury.energy_bills_rebate.energy_bills_credit": {
+            "2023-01-01.2024-01-01": ebr
+        },
         "gov.hmrc.vat.standard_rate": {"2023-01-01.2024-01-01": vat},
     }
 
@@ -422,6 +481,9 @@ with st.expander("Select a tax-benefit reform"):
         "Should the government change benefits?": invert_dict(benefits_map)[
             benefits
         ],
+        "Should the government change the state pension?": invert_dict(
+            state_pension_map
+        )[state_pension],
         "Should the government introduce a universal basic income?": invert_dict(
             ubi_map
         )[
@@ -538,6 +600,12 @@ with st.expander("See the impact on 10 example households"):
         "Elderly man with carer son": ELDERLY_MAN_WITH_CARER,
         "Single woman in London": SINGLE_WOMAN_LONDON_HOUSE_SHARE,
         "Single mother with two children": SINGLE_MOTHER_WITH_TWO_CHILDREN,
+        "Single adult on £20k": SINGLE_ADULT_20K,
+        "Married couple with two kids, both on £30k": MARRIED_COUPLE_TWO_KIDS_BOTH_30K,
+        "Single pensioner on £25k pension income": SINGLE_PENSIONER_25K_PENSION_INCOME,
+        "Married pensioner couple on £80k pension income": MARRIED_PENSIONER_COUPLE_80K_PENSION_INCOME,
+        "Married couple with one kid, one earner": MARRIED_COUPLE_1_KID_1_EARNER,
+        "Single adult on £60k": SINGLE_ADULT_HIGH_INCOME,
     }
 
     @st.cache_data(show_spinner=False)
