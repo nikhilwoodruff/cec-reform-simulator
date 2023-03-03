@@ -179,7 +179,7 @@ SINGLE_ADULT_20K = {
     },
     "benunits": {"your immediate family": {"members": ["you"]}},
     "households": {
-        "your household": {
+        "household": {
             "members": ["you"],
             "consumption": {"2023": 14_000},
             "full_rate_vat_consumption": {"2023": 14_000 * 0.6},
@@ -209,7 +209,7 @@ MARRIED_COUPLE_TWO_KIDS_BOTH_30K = {
         }
     },
     "households": {
-        "your household": {
+        "household": {
             "members": [
                 "you",
                 "your partner",
@@ -231,7 +231,7 @@ SINGLE_PENSIONER_25K_PENSION_INCOME = {
     },
     "benunits": {"your immediate family": {"members": ["you"]}},
     "households": {
-        "your household": {
+        "household": {
             "members": ["you"],
             "consumption": {"2023": 13_000},
             "full_rate_vat_consumption": {"2023": 13_000 * 0.6},
@@ -257,7 +257,7 @@ MARRIED_PENSIONER_COUPLE_80K_PENSION_INCOME = {
         }
     },
     "households": {
-        "your household": {
+        "household": {
             "members": ["you", "your partner"],
             "consumption": {"2023": 60_000},
             "full_rate_vat_consumption": {"2023": 23_000 * 0.4},
@@ -281,7 +281,7 @@ MARRIED_COUPLE_1_KID_1_EARNER = {
         }
     },
     "households": {
-        "your household": {
+        "household": {
             "members": ["you", "your partner", "your first child"],
             "consumption": {"2023": 30_000},
             "full_rate_vat_consumption": {"2023": 30_000 * 0.7},
@@ -298,7 +298,7 @@ SINGLE_ADULT_HIGH_INCOME = {
     },
     "benunits": {"your immediate family": {"members": ["you"]}},
     "households": {
-        "your household": {
+        "household": {
             "members": ["you"],
             "consumption": {"2023": 40_000},
             "full_rate_vat_consumption": {"2023": 40_000 * 0.4},
