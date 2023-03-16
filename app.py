@@ -601,7 +601,7 @@ with st.expander("See the impact on 10 example households"):
         "Single woman in London": SINGLE_WOMAN_LONDON_HOUSE_SHARE,
         "Single mother with two children": SINGLE_MOTHER_WITH_TWO_CHILDREN,
         "Single adult on £20k": SINGLE_ADULT_20K,
-        "Married couple with two kids, both on £30k": MARRIED_COUPLE_TWO_KIDS_BOTH_30K,
+        "Married couple with two kids": MARRIED_COUPLE_TWO_KIDS_BOTH_30K,
         "Single pensioner on £25k pension income": SINGLE_PENSIONER_25K_PENSION_INCOME,
         "Married pensioner couple on £80k pension income": MARRIED_PENSIONER_COUPLE_80K_PENSION_INCOME,
         "Married couple with one kid, one earner": MARRIED_COUPLE_1_KID_1_EARNER,
