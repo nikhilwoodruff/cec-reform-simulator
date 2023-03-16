@@ -608,6 +608,8 @@ with st.expander("See the impact on 10 example households"):
         "Single adult on £60k": SINGLE_ADULT_HIGH_INCOME,
     }
 
+    household_ids = [15564, 15565, 15566, 15567, 15568, 15569, 15570, 15571, 15572, 15573]
+
     @st.cache_data(show_spinner=False)
     def get_households_impact(reform):
         with st.spinner("Calculating impacts for example households..."):
@@ -663,6 +665,10 @@ with st.expander("See the impact on 10 example households"):
             return df.set_index("Household")
 
     df = get_households_impact(reform)
+    df["PolicyEngine link"] = [
+        f"https://policyengine.org/uk/policy?household={household_id}"
+        for household_id in household_ids
+    ]
     st.write(df)
 
 
