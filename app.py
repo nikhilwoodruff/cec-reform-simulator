@@ -608,7 +608,7 @@ with st.expander("See the impact on 10 example households"):
         "Single adult on £60k": SINGLE_ADULT_HIGH_INCOME,
     }
 
-    household_ids = [15564, 15649, 15650, 15651, 15568, 15569, 15570, 15571, 15572, 15573]
+    household_ids = [15564, 15663, 15650, 15651, 15568, 15569, 15570, 15571, 15572, 15573]
 
     @st.cache_data(show_spinner=False)
     def get_households_impact(reform):

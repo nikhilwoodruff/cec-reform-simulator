@@ -87,6 +87,7 @@ ELDERLY_MAN_WITH_CARER = {
             "household_net_income": {"2023": None},
             "household_benefits": {"2023": None},
             "household_tax": {"2023": None},
+            "winter_fuel_allowance": {"2023": 300},
         }
     },
 }
