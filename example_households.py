@@ -43,7 +43,7 @@ HIGH_EARNING_NUCLEAR_FAMILY = {
 
 ELDERLY_MAN_WITH_CARER = {
     "people": {
-        "elderly_man": {
+        "you": {
             "age": {
                 "2023": 74,
             },
@@ -93,7 +93,7 @@ ELDERLY_MAN_WITH_CARER = {
 
 SINGLE_WOMAN_LONDON_HOUSE_SHARE = {
     "people": {
-        "single_woman": {
+        "you": {
             "age": {
                 "2023": 27,
             },
@@ -130,7 +130,7 @@ SINGLE_WOMAN_LONDON_HOUSE_SHARE = {
 
 SINGLE_MOTHER_WITH_TWO_CHILDREN = {
     "people": {
-        "single_mother": {
+        "you": {
             "age": {
                 "2023": 40,
             },
