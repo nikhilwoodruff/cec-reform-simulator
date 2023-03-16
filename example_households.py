@@ -65,7 +65,7 @@ ELDERLY_MAN_WITH_CARER = {
     },
     "benunits": {
         "benunit_1": {
-            "members": ["elderly_man"],
+            "members": ["you"],
             "benunit_rent": {
                 "2023": 4_500,
             },
@@ -76,7 +76,7 @@ ELDERLY_MAN_WITH_CARER = {
     },
     "households": {
         "household": {
-            "members": ["elderly_man", "carer"],
+            "members": ["you", "carer"],
             "BRMA": {"2023": "NORTH_DEVON"},
             "local_authority": {"2023": "NORTH_DEVON"},
             "region": {"2023": "SOUTH_WEST"},
@@ -104,7 +104,7 @@ SINGLE_WOMAN_LONDON_HOUSE_SHARE = {
     },
     "benunits": {
         "benunit": {
-            "members": ["single_woman"],
+            "members": ["you"],
             "benunit_rent": {
                 # ~60% of income
                 "2023": 18_000
@@ -114,7 +114,7 @@ SINGLE_WOMAN_LONDON_HOUSE_SHARE = {
     },
     "households": {
         "household": {
-            "members": ["single_woman"],
+            "members": ["you"],
             "BRMA": {"2023": "INNER_NORTH_LONDON"},
             "local_authority": {"2023": "HACKNEY"},
             "region": {"2023": "LONDON"},
@@ -151,7 +151,7 @@ SINGLE_MOTHER_WITH_TWO_CHILDREN = {
     },
     "benunits": {
         "benunit": {
-            "members": ["single_mother", "child_1", "child_2"],
+            "members": ["you", "child_1", "child_2"],
             "benunit_rent": {
                 "2023": 7_000,
             },
@@ -159,7 +159,7 @@ SINGLE_MOTHER_WITH_TWO_CHILDREN = {
     },
     "households": {
         "household": {
-            "members": ["single_mother", "child_1", "child_2"],
+            "members": ["you", "child_1", "child_2"],
             "BRMA": {"2023": "CENTRAL_GREATER_MANCHESTER"},
             "local_authority": {"2023": "MANCHESTER"},
             "region": {"2023": "NORTH_WEST"},

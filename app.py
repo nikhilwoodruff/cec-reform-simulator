@@ -666,7 +666,7 @@ with st.expander("See the impact on 10 example households"):
 
     df = get_households_impact(reform)
     df["PolicyEngine link"] = [
-        f"https://policyengine.org/uk/policy?household={household_id}"
+        f"https://policyengine.org/uk/household?household={household_id}"
         for household_id in household_ids
     ]
     st.write(df)
