@@ -2,3 +2,4 @@ plotly
 requests
 humanize
 pandas
+numpy
